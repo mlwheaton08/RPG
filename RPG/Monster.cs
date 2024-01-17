@@ -1,11 +1,11 @@
-﻿using RPG.Characters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
-namespace RPG.Models;
+namespace RPG;
 
 internal class Monster
 {
@@ -13,6 +13,19 @@ internal class Monster
     public int Defense { get; set; }
     public int Offense { get; set; }
     public int Health { get; set; }
+    public bool SkipTurn { get; set; }
+
+    public void Configure()
+    {
+        Random rnd = new Random();
+
+        Defense = rnd.Next(-2, 4);
+        Offense = rnd.Next(-2, 3);
+        Health = rnd.Next(35, 50);
+        SkipTurn = false;
+
+        CreateName();
+    }
 
     public void CreateName()
     {

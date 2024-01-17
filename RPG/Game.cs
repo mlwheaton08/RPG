@@ -1,32 +1,20 @@
-﻿using RPG.Characters;
-using RPG.Models;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPG.Repository;
+namespace RPG;
 
 internal class Game
 {
     public void Run()
     {
-        Random rnd = new Random();
-        var monster = new Monster()
-        {
-            Defense = rnd.Next(-3, 4),
-            Offense = rnd.Next(-3, 4),
-            Health = rnd.Next(35, 50)
-        };
-        monster.CreateName();
+        var monster = new Monster();
+        monster.Configure();
 
-        //Console.WriteLine(monster.Name);
-        //Console.ReadLine();
-
-        // configure player character
         var player = new Player();
-        player.CreatePlayer();
+        player.Configure();
 
         Console.Clear();
         OutputDialog($"Very well. Certainly someone with these skills can handle a {monster.Name} with ease, no?");
@@ -51,10 +39,11 @@ internal class Game
         {
             bool monsterDead = PlayerTurn(monster, player);
             bool playerDead = false;
-            if (!monsterDead)
+            if (!monsterDead && !monster.SkipTurn)
             {
                 playerDead = MonsterTurn(monster, player);
             }
+            monster.SkipTurn = false;
 
             if (monsterDead)
             {
@@ -82,31 +71,90 @@ internal class Game
         {
             Console.Clear();
             BattleHeader(monster, player);
-            Console.WriteLine("Press 'a' to attack!");
+            Console.WriteLine("'a' to attack");
+            Console.WriteLine("'p' to use potion");
+            Console.WriteLine("'n' to cast net");
             string playerInputAttack = Console.ReadLine();
 
-            if (playerInputAttack == "a")
+            switch (playerInputAttack)
             {
-                validInput = true;
-                damage += rnd.Next(1, 11) + player.Offense - monster.Defense;
+                case "a":
+                    {
+                        validInput = true;
+                        damage += rnd.Next(1, 11) + player.Offense + player.AttackBuff - monster.Defense;
+
+                        if (damage > 0)
+                        {
+                            Console.Clear();
+                            OutputDialog($"The {monster.Name} takes {damage - player.AttackBuff} damage!", 20);
+                            if (player.AttackBuff > 0) OutputDialog($" Plus an additional {player.AttackBuff} points!", 20);
+                            Console.ReadLine();
+
+                            monster.Health -= damage;
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            OutputDialog($"You miss!", 20);
+                            Console.ReadLine();
+                        }
+
+                        player.AttackBuff = 0;
+                    }
+                    break;
+                case "p":
+                    {
+                        IItem potion = player.Inventory.Find(item => item.Name == "Potion");
+
+                        if (potion.Quantity > 0)
+                        {
+                            validInput = true;
+                            Console.Clear();
+                            OutputDialog(potion.SuccessMessage, 20);
+                            Console.ReadLine();
+                            potion.Use(monster, player);
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            OutputDialog($"You're all out of this item!", 20);
+                            Console.ReadLine();
+                        }
+                    }
+                    break;
+                case "n":
+                    {
+                        IItem net = player.Inventory.Find(item => item.Name == "Net");
+
+                        if (net.Quantity > 0)
+                        {
+                            validInput = true;
+
+                            if (rnd.Next(1, 3) == 2)
+                            {
+                                Console.Clear();
+                                OutputDialog(net.SuccessMessage, 20);
+                                Console.ReadLine();
+                                net.Use(monster, player);
+                            }
+                            else
+                            {
+                                Console.Clear();
+                                OutputDialog(net.FailMessage, 20);
+                                Console.ReadLine();
+                            }
+                        }
+                        else
+                        {
+                            Console.Clear();
+                            OutputDialog($"You're all out of this item!", 20);
+                            Console.ReadLine();
+                        }
+                    }
+                    break;
             }
         }
         while (!validInput);
-
-        if (damage > 0)
-        {
-            Console.Clear();
-            OutputDialog($"The {monster.Name} takes {damage} damage!", 20);
-            Console.ReadLine();
-
-            monster.Health -= damage;
-        }
-        else
-        {
-            Console.Clear();
-            OutputDialog($"You miss!", 20);
-            Console.ReadLine();
-        }
 
         bool monsterDead = false;
         if (monster.Health <= 0) monsterDead = true;
@@ -121,7 +169,8 @@ internal class Game
         Console.Clear();
         BattleHeader(monster, player);
         OutputDialog($"The {monster.Name} attacks!", 20);
-        Console.ReadLine();
+        Console.WriteLine();
+        OutputDialog("..........................", 30);
 
         if (damage > 0)
         {
@@ -196,6 +245,6 @@ internal class Game
 
     public void BattleHeader(Monster monster, Player player)
     {
-        Console.WriteLine($"{monster.Name}: {monster.Health}         {player.Name}: {player.Health}");
+        Console.WriteLine($"{monster.Name}: {monster.Health}         {player.Name}: {player.Health}   Attack buff: {player.AttackBuff}");
     }
 }

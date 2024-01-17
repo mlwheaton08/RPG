@@ -1,4 +1,4 @@
-﻿using RPG.Repository;
+﻿using RPG;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,7 +6,7 @@ using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RPG.Characters;
+namespace RPG;
 
 internal class Player
 {
@@ -14,10 +14,15 @@ internal class Player
     public string Title { get; set; }
     public int Defense { get; set; }
     public int Offense { get; set; }
+    public int AttackBuff { get; set; }
     public int Health { get; set; }
+    public bool SkipTurn { get; set; }
+    public List<IItem> Inventory { get; set; } = new List<IItem>();
 
-    public void CreatePlayer()
+    public void Configure()
     {
+        AttackBuff = 0;
+        SkipTurn = false;
         Game.OutputDialog("What is your name, adventurer? ");
         string playerInputName = Console.ReadLine();
         Name = playerInputName;
@@ -26,6 +31,34 @@ internal class Player
         Title = playerInputTitle;
         Console.Clear();
         Game.OutputDialog($"We gladly welcome {Name}, {Title}!");
+        Console.ReadLine();
+
+        Potion potion = new Potion()
+        {
+            Name = "Potion",
+            Quantity = 2,
+            SuccessMessage = "You gain 10 points of health!"
+        };
+        Inventory.Add(potion);
+
+        Net net = new Net()
+        {
+            Name = "Net",
+            Quantity = 1,
+            SuccessMessage = "You've successfully trapped the enemy and can take another turn, with an added attack buff!",
+            FailMessage = "You fail to trap the enemy."
+        };
+        Inventory.Add(net);
+
+        Console.Clear();
+        Game.OutputDialog($"Here, take these.");
+        Console.WriteLine();
+        Console.WriteLine("[you're handed 2 glass containers containing red liquid]");
+        Console.WriteLine("[...and also what appears to be a fishing net]");
+        Console.ReadLine();
+
+        Console.Clear();
+        Game.OutputDialog($"That liquid is a healing potion. The net will serve you when the time is right. You have an important battle ahead of you.");
         Console.ReadLine();
 
         bool validInput = false;
@@ -41,16 +74,15 @@ internal class Player
             {
                 validInput = true;
                 Offense = 3;
-                Defense = -1;
+                Defense = -3;
                 Health = 40;
             }
             if (playerInputStats == "d")
             {
                 validInput = true;
-                Offense = -1;
+                Offense = -3;
                 Defense = 3;
                 Health = 50;
-
             }
         }
         while (!validInput);

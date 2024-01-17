@@ -1,4 +1,4 @@
-﻿using RPG.Repository;
+﻿using RPG;
 
 var game = new Game();
 
