@@ -13,7 +13,7 @@ internal class Monster
     public int Defense { get; set; }
     public int Offense { get; set; }
     public int Health { get; set; }
-    public bool SkipTurn { get; set; }
+    public State State { get; set; }
 
     public void Configure()
     {
@@ -22,7 +22,6 @@ internal class Monster
         Defense = rnd.Next(-2, 4);
         Offense = rnd.Next(-2, 3);
         Health = rnd.Next(35, 50);
-        SkipTurn = false;
 
         CreateName();
     }

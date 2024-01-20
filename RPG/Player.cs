@@ -16,13 +16,12 @@ internal class Player
     public int Offense { get; set; }
     public int AttackBuff { get; set; }
     public int Health { get; set; }
-    public bool SkipTurn { get; set; }
+    public State State { get; set; }
     public List<IItem> Inventory { get; set; } = new List<IItem>();
 
     public void Configure()
     {
         AttackBuff = 0;
-        SkipTurn = false;
         Game.OutputDialog("What is your name, adventurer? ");
         string playerInputName = Console.ReadLine();
         Name = playerInputName;
@@ -86,5 +85,16 @@ internal class Player
             }
         }
         while (!validInput);
+    }
+
+    public void ClearState()
+    {
+        State.SkipTurn = false;
+        State.Prone = false;
+        State.Grappled = false;
+        State.Paralyzed = false;
+        State.Unconscious = false;
+        State.OnFire = false;
+        State.Frozen = false;
     }
 }

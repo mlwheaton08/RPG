@@ -15,7 +15,7 @@ internal class Net : IItem
 
     public void Use(Monster monster, Player player)
     {
-        monster.SkipTurn = true;
+        monster.State.SkipTurn = true;
         player.AttackBuff = 5;
 
         if (Quantity > 0)

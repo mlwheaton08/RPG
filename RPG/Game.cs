@@ -39,11 +39,11 @@ internal class Game
         {
             bool monsterDead = PlayerTurn(monster, player);
             bool playerDead = false;
-            if (!monsterDead && !monster.SkipTurn)
+            if (!monsterDead && !monster.State.SkipTurn)
             {
                 playerDead = MonsterTurn(monster, player);
             }
-            monster.SkipTurn = false;
+            monster.State.SkipTurn = false;
 
             if (monsterDead)
             {
